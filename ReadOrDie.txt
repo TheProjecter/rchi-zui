@@ -1,0 +1,52 @@
+Jono's quick-and-dirty Zooming User Interface (zui) prototype.
+
+Contact:  jono@humanized.com
+
+This project is not currently associated with Humanized.  It's just a personal side-project.  However, there's always the possibility that Humanized might decide to start pursuing it as a project.  That would make me happy.
+
+I should also mention that Aza is also working on a ZUI, but he's doing it as a job for Ubuntu and he's doing it all in JavaScript in a Firefox canvas (yuck).  However, his ZUI has a picture of Namor the Sub-Mariner in it so I won't hate on it too bad.  We both started doing similar things around the same time without talking to each other, so we currently have two unrelated codelines.  I hope that at some point we'll be able to factor out some of our shared functionality into a shared library to avoid further duplication of effort.
+
+Goals:
+
+My first goal is something very modest.  I'm trying to make a ZUI-based application that I can use to edit and upload webcomics.  This will require the ability to manipulate, edit, and transform various text and graphical formats, save changes, and upload them to a URL.  I figure that writing something I will actually use is the best way to get work done on this ZUI since I will be eating my own dog-food.  I also figure that since I've found GIMP's user interface nearly impossible to use for what I want to do, I might as well try to write my own.  I may end up integrating GIMP code into this, for some of it
+
+Longer-term goals are to see what we can do, interface-wise, by combining a ZUI with a tagging system, and to make a useful and working prototype of the kind of ZUI described in The Humane Interface, and then to go beyond it. |;`)
+
+Prerequisistes:
+Python 2.4
+wxpython   (http://www.wxpython.org/)
+pysqlite   (http://sourceforge.net/projects/pysqlite/)
+sqlobject  (http://sqlobject.org/index.html)
+
+Wxpython has some very good points but also some very bad points.  I'm thinking of replacing it with an alternative, perhaps PyGame.
+
+Use:
+
+Go to a command line, cd to the trunk directory, run "python zui.py".
+
+Drop files into the "goodies" folder.  The zui will snarf the files when it starts up (copy them to its database).  It's not recursive (yet) so subfolders inside goodies will not get snarfed.
+
+Currently supported file types:  .jpg, .gif, .png as images; .txt and .py as text.   I've started working on supporting .html files as web objects but this is currently broken.
+
+Enter a tag in the search box and click "search" to get all the objects matching that tag.  You can use several words
+with the "+" sign between them to search for objects that match all tags.  One of the items that comes back from a search
+will always be a web-object continaing a google search for your search terms.  This doesn't work yet so the item will be
+a blank white box.
+
+Click the "Untagged" button to get all objects with no tags on them.  (This is currently the only way to get at such objects).
+
+Any searching or clicking on "untagged" will just add the new items on top of the old items.  You can have multiple views open to the same underlying object.  Currently no attempt is made to prevent overlap, so this can get pretty messy.  New items are always added at the same on-screen size no matter what zoom level everything else is at.  The idea is that you zoom back out to follow your train of thought backwards.
+
+Click the "Clear" button when your ZUI area gets too full of junk.  Everything will still be there; you're just clearing away the views to it.  
+
+Shift click and drag to scroll around the ZUI area.
+
+Ctrl-left-click to zoom in.  Ctrl-right-click to zoom out.
+
+Alt-click on an object to tag it.  A text edit control will appear at the top of the screen containing the object's current tags; edit these as normal.  They will be automatically saved as soon as you do anything else.
+
+Normal click on a text object to edit its text contents.  This is currently semi-broken.
+
+Normal double-click on any object to zoom to its full normal size.
+
+Alt-Ctrl-click to draw on an image.  Left mouse button draws (pencil tool, in black); right mouse button erases.  Currently changes are not getting saved.  Also, the drawing tools suck.  This is just a proof-of-concept but I plan major expansion, with a full suite of image-editing tools all accessed quasimodally.
