@@ -1,0 +1,83 @@
+TODO:
+try pygame instead of wxpython
+look at libraries pygame uses
+
+support more logical operators in searches.
+a "show me all tags that there are and how many images with each" view.  Also "Show me how many untagged images"
+
+Smarter snarfing: recurse into subdirectories
+
+Learn how to display an animated gif so it animates.
+
+Recognize series by sequential filenames in a folder.
+Allow user to label something part of a series
+Have a view for series
+(Big question: why couldn't series just be tag names?)
+(Answer: files that share a tag have no defined order.  A series does have a defined order.)
+
+Rating field.  Use a spin control so we can bump it up and down.
+Bump up automatically on view?  Just use "fave" and "sucks" tags instead?
+
+Speaking of "sucks", a delete button.
+
+try win32api.GetAsyncKeyState() to figure out what keys are down on a click, and thereby to allow all letters to be
+used as quasimodal key shortcuts, not just modifier keys.
+key shortcuts to switch tools:
+z = zoom
+c = scroll
+s = select
+d = draw
+e = erase
+f = find (focuses on search box)?
+t = tag?
+Revert? refresh? copy/clone/duplicate? remove? write? split screen? merge screen?
+
+A command to remove things, or multiple things or classes of things, from the view without clearing everything?
+
+Select tool lets you select objects to do operations on?  Or does that happen automatically
+when you zoom far enough into an object that it's taking up most of your screen?  Select objects and move them around?
+Select objects as a group, and assign tags to all of them at once or move them around all at once?
+
+Save changes that get made with image-editing tools.  (Figure out whence to call SaveChanges!)
+Make a color-picking tool.
+Allow pencil and eraser to be bigger than 1 pixel (esp. eraser!)
+
+Current problems with text objects:
+1. Can't get the click event into the text object to actually edit text!!!
+2. Can't save text ( try this again )
+3. They still have scrollbars. (this'll do, for now, but I really want the scroll tool to be used instead.)
+
+Web objects!! They are tiny little embedded web browser windows, basically.  There's no forward or back or URL or
+scroll bars, though.  To scroll you use the ZUI scroll tool, as the whole thing is a rectangle (like the text object)
+as long as the page.  When you click a link, it opens a view onto the new page but leaves the view onto the old page
+where it is.  Need to figure out exactly where and at what size the new page appears, but the idea is that you should
+be able to zoom back out and see a tree of all the pages on the site that you've seen so far.  You can also put tags
+on web objects, which replaces the idea of bookmarks, because now that page will show up when you search for the tag.
+What about refreshing a web object?
+
+Need command to create new blank text object.
+
+Need command to create new blank image object.
+
+
+Bugs:
+
+Seems to be a bug where dragging with scroll tool starting in certain images and ending in the background
+results in incorrect scroll.  (Only the zeroth image?)
+
+After a lot of rearranging, stuff gets out of whack, possibly due to round-off error with all the multiplying
+and dividing?
+
+
+Long-term:
+
+Image editing will eventually need layers.  This can be extended across the ZUI, so it's no longer two-dimensional,
+but has the concept of front and back layers.  What else can we do with this idea?
+
+Need to be able to duplicate objects, or take part of an object and create a new object out of it, or copy/move part of
+an object (e.g. chunk of text) into another object ( an image, becoming a text layer above the image ).
+
+Need to have change history on objects.  When you save changes on something, older versions are always still available
+through something like Subversion or something like a database rollback operation.
+
+Saving/uploading finished image and HTML objects to a specified URL to "deploy" the webcomic.  Also, previews for what this will look like, before the operation is consummated.
