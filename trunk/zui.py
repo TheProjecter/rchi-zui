@@ -5,6 +5,7 @@ import os
 import cStringIO
 import sqlobject
 import base64
+import pysqlite2
 
 # I wish i could make these quasimodal on various keys
 # Tool constants:
@@ -354,17 +355,19 @@ class DirectorySnarfer:
         self.__dirName = directoryName
 
         # connect to DB here:
-        dbUrl = "sqlite:/zui.db"
+        dbUrl = "sqlite:/nonexist.db"
 
         connection = sqlobject.connectionForURI( dbUrl )
         sqlobject.sqlhub.threadConnection = connection
         self._connection = connection
         
-        # TODO run these if tables need creation.
-        # SingleImageRow.createTable()
-        # ImageSeriesRow.createTable()
-
-        print "Untagged:", SingleImageRow.select( """tags == ''""" ).count()
+        try:
+            print "Untagged:", SingleImageRow.select( """tags == ''""" ).count()
+        except pysqlite2.dbapi2.OperationalError:
+            # Most likely cause is that the tables haven't been created yet:
+            print "Creating tables."
+            SingleImageRow.createTable()
+            ImageSeriesRow.createTable()  
 
     def snarf( self ):
         # TODO recursive snarfing (use os.walk)
