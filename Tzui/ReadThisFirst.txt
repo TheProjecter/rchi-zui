@@ -1,0 +1,22 @@
+Current features:
+- Full zooming capability using OpenGL (compliments of Opioid2D)
+- Image objects (only supports png, jpg, gif for now)
+- Drag and drop using the Drop Box (innacurate though, after camera is moved and scaled around)
+- Basic object manipulation using pseudomodes (only Ctrl for position/scale)
+- Primitive selection system (no visual ques yet, sorry!)
+
+Features to be added for first full release:
+- Text objects (full text input/editing support compliments of Archy)
+- Object search using tags with Global Leap (left/right Alt)
+- Object creation
+- Command system (again from Archy)
+- All data types will be represented in some form (mostly a rectangle with the type stated inside it)
+
+You need several packages in order to run Tzui (for I stand on the shoulders of giants):
+- Python 2.5 (not tested on 2.4)
+- wxPython
+- Opioid2D alpha6 (http://opioid-interactive.com/opioid2d/)
+- Pygame (required by O2D - download special build*, the one on pygame's page is broken)
+- Numeric (required by O2D)
+
+* Only if you have Python 2.5: http://opioid-interactive.com/~shang/python-win32/pygame-1.7.1release.win32-py2.5.exe
