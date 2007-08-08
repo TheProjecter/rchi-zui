@@ -95,10 +95,6 @@ class Compass(Sprite):
     image = "ui_images/zoom_in4.png"
     layer = "SecOverlay"
 
-#class MouseHook(Sprite):
-#    image = "ui_images/test.png"
-#    layer = "SecOverlay"
-
 
 zControl = ZoomCheck()
 mmbdown = 0,0
@@ -125,6 +121,10 @@ class Tzui(Scene):
         ResourceManager.preload_images("ui_images/*.png")
         ResourceManager.preload_images("images/*.*")
         Display.set_clear_color([0.3,0.3,0.3])
+        ## Users can set a static background image here
+        # In the future, a simple command will do the trick.
+        # Remember to disable set_clear_color when bg is set to
+        # save a lot of performance stuff (it's noticeable)
 #        Sprite("bg.jpg").set(
 #            layer = "bg",
 #            position = (512,384),
@@ -155,19 +155,26 @@ class Tzui(Scene):
         compass.do(KeepFacing(self.mouseHook))
         
         self.SelMan = SelectionManager()
-#        db = dbManager()
+#        self.db = dbManager()
+#        self.store = self.db.s
         
         ## Using this until I hook up a database to the DropBox.
         # Also note that the DropBox coordinates don't match
-        # a moved camera. Will fix this later...
+        # a moved camera. Will fix this Real Soon Now.
         tzuiFolder = sys.path[0] + '\\images\\'
         picsStuff = os.listdir(tzuiFolder)
+#        dbList = self.db.list_objects()
         seriously = []
         for filename in picsStuff:
             seriously.append(tzuiFolder + filename)
         for path in seriously:
-            ImageObject(path, 2000*random()-1000, 1000*random()-1000)
-#            db.add(path, 2000*random()-1000, 1000*random()-1000)
+            # Check to see if the image is already in the db, if it is,
+            # create an ImageObject using the path and coordinates found
+            # referenced in the db
+#            for path in dbList:
+#                if path:
+            item = ImageObject(path, 2000*random()-1000, 1000*random()-1000)
+#            self.db.add(path, item)
         
         ## Variables for metamethods, which are silly things.
         mmb = 0 # If mmb is 1, the middle mouse button is pressed
@@ -184,6 +191,10 @@ class Tzui(Scene):
         self.ctrl = ctrl
         shift = 0 # either shift keys as well
         self.shift = shift
+        lalt = 0
+        self.lalt = lalt
+        ralt = 0
+        self.ralt = ralt
 
     def realtick(self):
         """This method runs 25 times a second."""
@@ -210,20 +221,6 @@ class Tzui(Scene):
         if zControl.check():
             cam.radial_velocity = angle,distance
 
-        # Just messing around :)
-        if key(K_LALT):
-            print "Future back leap!"
-        else:
-            pass
-        if key(K_RALT):
-            print "Future forward leap!"
-        else:
-            pass
-        if key(K_c):
-            self.co.do(AlphaFade(0.8, 0.2))
-        else:
-            self.co.do(AlphaFade(0, 0.2))
-            
         ## Quasimode triggers
         if key(K_LCTRL) or key(K_RCTRL):
             self.ctrl = 1
@@ -233,6 +230,20 @@ class Tzui(Scene):
             self.shift = 1
         else:
             self.shift = 0
+        if key(K_LALT):
+            self.lalt = 1
+        else:
+            self.lalt = 0
+        if key(K_RALT):
+            self.ralt = 1
+        else:
+            self.ralt = 0
+
+        sm = self.SelMan
+        # Stop object scaling when Ctrl isn't pressed
+        if not self.ctrl:
+            for everything in sm.list():
+                everything.abort_actions(Scale)
 
         ## Recepter for incoming objects via DropBox
         try:
@@ -253,7 +264,7 @@ class Tzui(Scene):
         sm = self.SelMan
         layer = self.get_layer("canvas0")
         x,y = layer.convert_pos(*Mouse.position)
-        s = layer.pick(x,y)
+        object = layer.pick(x,y)
         cam = self.camera
         key = Keyboard.is_pressed
         if ev.button == 1:
@@ -275,6 +286,15 @@ class Tzui(Scene):
         if self.mwu and not self.ctrl:  # Scroll up - zoom in
             zControl.makeTrue()
             zControl.increase()
+            if zControl.level() == -1:
+                self.zoomIcon.do(Delete())
+                self.zoomIcon = InfoIconZoomOut1()
+            if zControl.level() == -2:
+                self.zoomIcon.do(Delete())
+                self.zoomIcon = InfoIconZoomOut2()
+            if zControl.level() == -3:
+                self.zoomIcon.do(Delete())
+                self.zoomIcon = InfoIconZoomOut3()
             if zControl.level() == 1:
                 self.zoomIcon.do(Delete())
                 self.zoomIcon = InfoIconZoomIn1()
@@ -291,6 +311,15 @@ class Tzui(Scene):
         if self.mwd and not self.ctrl:  # Scroll down - zoom out
             zControl.makeTrue()
             zControl.decrease()
+            if zControl.level() == 1:
+                self.zoomIcon.do(Delete())
+                self.zoomIcon = InfoIconZoomIn1()
+            if zControl.level() == 2:
+                self.zoomIcon.do(Delete())
+                self.zoomIcon = InfoIconZoomIn2()
+            if zControl.level() == 3:
+                self.zoomIcon.do(Delete())
+                self.zoomIcon = InfoIconZoomIn3()
             if zControl.level() == -1:
                 self.zoomIcon.do(Delete())
                 self.zoomIcon = InfoIconZoomOut1()
@@ -304,8 +333,6 @@ class Tzui(Scene):
                 self.zoomIcon.do(Delete())
                 self.zoomIcon = InfoIconZoomOut4()
             cam.do(Scale(.5))
-#        else:
-#            pass
         if zControl.level() == 0:
             self.zoomIcon.do(Delete())
             zControl.makeFalse()
@@ -313,40 +340,36 @@ class Tzui(Scene):
             self.zoomIcon.set(alpha=0)
 
         ## Selection handling.
-        # Pretty broken and unpredictable due
-        # to some problems with ImageObject and/or perhaps O2D.
-        if self.lmb and not self.shift and not self.ctrl:
-            if s is not None:
-                sm.add(s)
-        else:
-            pass
-        if self.lmb and self.shift:
-            if s is not None:
-                sm.add(s)
+        # It'd be nice if I didn't have to specify "not ctrl" etc
+        # As it is, you can still press eg "d"+lmb to select...
+        # does this matter? Perhaps it's only necessary to explicitly
+        # define only the quasimodes (eg ctrl, alt, etc). Thoughts?
+        if self.lmb and not self.shift and not self.ctrl \
+                            and not self.lalt and not self.ralt:
+            if object is not None:
+                sm.add(object)
+#                print "Tags:", self.store.query(Tag, Tag.item == object)
+        if self.lmb and self.shift and not self.ctrl \
+                            and not self.lalt and not self.ralt:
+            if object is not None:
+                sm.remove(object)
             else:
-                pass
-        else:
-            pass
-        if self.lmb and self.shift and self.ctrl:
-            sm.reset()
-        if self.lmb and self.ctrl:
-            if s is not None:
-                sm.remove(s)
-            else:
-                pass
-        else:
-            pass
+                sm.reset()
+
+        ## Dragging
         if self.rmb and self.ctrl:
-            if s is not None:
-                s.draggable = True
-                # All images CAN be dragged, but won't because they
-                # need to be hit by the cursor explicitly. Something to
-                # change for the next release.
-                for everything in sm.list():
-                    s.draggable = True
+            if object is not None:
+                object.draggable = True
+                ## TODO
+                # Drag everything that is selected.
+#                for everything in sm.list():
+#                    everything.draggable = True
+#                    everything.position = self.pointerPosition # No.
         else:
-            if s is not None:
-                s.draggable = False
+            if object is not None:
+                object.draggable = False
+                
+        ## Object scaling
         if self.mwu and self.ctrl:
             for everything in sm.list():
                 everything.do(Scale(2))
@@ -374,10 +397,16 @@ class Tzui(Scene):
         if ev.key == K_ESCAPE:
             Director.quit()
         if ev.key == K_DELETE:
+            # It doesn't delete them all the first time. Anyone know why?
             for object in sm.list():
                 object.do(Delete())
-                sm.remove(object)
-                print object, "was removed from the canvas."
+            for object in sm.list():
+                object.do(Delete())
+            for object in sm.list():
+                object.do(Delete())
+            for object in sm.list():
+                object.do(Delete())
+            sm.reset()
 
 # Wicked mad huge props to Sami Hangaslammi for the immense amount
 # of help in getting the queue system to work, as well as the
@@ -390,7 +419,7 @@ def BeginThread():
    dropper.setDaemon(True)
    dropper.start()
 
-Display.init((800,600), (1024,768), title="Tzui preview1")
+Display.init((800,600), (1024,768), title="Tzui preview1") #, icon="ui_images/icon.png"
 q = Queue.Queue()
 Tzui.set_queue(q)
 MyFileDropTarget.set_queue(q)
