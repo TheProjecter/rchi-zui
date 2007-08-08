@@ -1,21 +1,5 @@
-"""
-The SM is used as a bridge between the canvas object and
-the database object. When the canvas object is clicked,
-the db obj is called and added to a list. When something
-happens to the canvas obj, the db obj is updated by way of
-the command being applied to the db obj in the list.
-
-In other words, when a command is run, it will grab the
-list that the SM built and run the command on every object
-in the list.
-
-The SM sorts the list for the command system so that the
-command is only run on the supported object type(s).
-
-Of course, at the moment it's nothing.
-"""
-
 #from dbManager import dbManager
+from Opioid2D import *
 import os
 
 class SelectionManager(object):
@@ -28,20 +12,35 @@ class SelectionManager(object):
 		
 	def add(self, object=None):
 		if self.newlist.count(object) >= 1:
-			self.remove(object)
-			print object, "has been deselected."
+			pass
 		else:
 			self.newlist.append(object)
-			print object, "has been added to the selection list."
+			object.do(Repeat(ColorFade((0.4,0.4,1), secs=1) + \
+						ColorFade((0.55,0.55,1), secs=1)))
 
 	def remove(self, object=None):
 		if self.newlist.count(object) >= 1:
 			self.newlist.remove(object)
-			print object, "has been deselected."
+			object.abort_actions(ColorFade)
+			object.do(ColorFade((1,1,1),secs=0.2))
+		else:
+			pass
 		
 	def reset(self):
-		del self.newlist[:]
-		print "Selection list cleared."
-		
+		'''Will someone please tell me why it doesn't remove everything
+		on its first try?
+		'''
+		for object in self.newlist:
+			self.remove(object)
+		for object in self.newlist:
+			self.remove(object)
+		for object in self.newlist:
+			self.remove(object)
+		for object in self.newlist:
+			self.remove(object)
+		for object in self.newlist:
+			self.remove(object)
+		# don't forget to remove them from the db as well
+	
 	def list(self):
 		return self.newlist
